@@ -1,7 +1,9 @@
-import { readFile } from 'fs/promises';
-import { PostDto } from './dtos/post.dto';
 import { writeFile } from 'fs';
+import { readFile } from 'fs/promises';
+
 import { Injectable } from '@nestjs/common';
+
+import { PostDto } from './dtos/post.dto';
 
 export interface BlogRepository {
   listPosts(): Promise<PostDto[]>;

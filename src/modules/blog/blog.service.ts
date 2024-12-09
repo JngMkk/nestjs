@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PostDto } from './dtos/post.dto';
+
 import { BlogFileRepository } from './blog.repository';
+import { PostDto } from './dtos/post.dto';
 
 @Injectable()
 export class BlogService {
