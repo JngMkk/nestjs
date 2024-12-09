@@ -5,14 +5,14 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Post,
   Put,
 } from '@nestjs/common';
-import { UserService } from './users.service';
-import { User } from './entities/user.entity';
-import { CreateUserDto, UpdateUserDto } from './dtos/bodies.dto';
-import { ReadUserDto } from './dtos/responses.dto';
 import { plainToInstance } from 'class-transformer';
+
+import { UpdateUserDto } from './dtos/bodies.dto';
+import { ReadUserDto } from './dtos/responses.dto';
+import { User } from './entities/user.entity';
+import { UserService } from './users.service';
 
 @Controller('users')
 export class UserController {
@@ -22,12 +22,6 @@ export class UserController {
     return plainToInstance(ReadUserDto, user, {
       excludeExtraneousValues: true,
     });
-  }
-
-  @Post()
-  async createUser(@Body() body: CreateUserDto): Promise<ReadUserDto> {
-    const user = await this.userService.createUser(body);
-    return this.convertToReadUserDto(user);
   }
 
   @Get('/:id')
