@@ -1,9 +1,9 @@
-import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
-import { Response } from 'express';
 
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpDto } from './dtos/bodies.dto';
+import { ReadTokenDto } from './dtos/responses.dto';
 import { ReadUserDto } from '../users/dtos/responses.dto';
 import { User } from '../users/entities/user.entity';
 
@@ -17,6 +17,15 @@ export class AuthController {
     });
   }
 
+  convertToReadTokenDto(tokens: {
+    accessToken: string;
+    refreshToken: string;
+  }): ReadTokenDto {
+    return plainToInstance(ReadTokenDto, tokens, {
+      excludeExtraneousValues: true,
+    });
+  }
+
   @Post('/signup')
   async signUp(@Body() body: SignUpDto): Promise<ReadUserDto> {
     const user = await this.authService.signUp(body);
@@ -25,10 +34,8 @@ export class AuthController {
 
   @Post('/signin')
   @HttpCode(200)
-  async signIn(
-    @Body() body: SignInDto,
-    @Res() res: Response,
-  ): Promise<Response<any, Record<string, any>>> {
-    return await this.authService.signIn(body, res);
+  async signIn(@Body() body: SignInDto): Promise<ReadTokenDto> {
+    const tokens = await this.authService.signIn(body);
+    return this.convertToReadTokenDto(tokens);
   }
 }
