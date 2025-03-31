@@ -1,6 +1,17 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
+import { Request, Response } from 'express';
 
+import { GoogleAuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpDto } from './dtos/bodies.dto';
 import { ReadTokenDto } from './dtos/responses.dto';
@@ -37,5 +48,17 @@ export class AuthController {
   async signIn(@Body() body: SignInDto): Promise<ReadTokenDto> {
     const tokens = await this.authService.signIn(body);
     return this.convertToReadTokenDto(tokens);
+  }
+
+  @Get('to-google')
+  @UseGuards(GoogleAuthGuard)
+  async toGoogle(@Req() req: Request) {}
+
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const { user } = req;
+
+    return res.send(user);
   }
 }
