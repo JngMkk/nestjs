@@ -30,21 +30,10 @@ let posts: PostModel[] = [
 
 @Injectable()
 export class PostsService {
-  /**
-   * [GET] /posts 모든 게시글을 조회한다.
-   * @returns 게시글 목록
-   */
   getPosts(): PostModel[] {
     return posts;
   }
 
-  /**
-   * [POST] /posts 게시글을 생성한다.
-   * @param author 게시글 작성자
-   * @param title 게시글 제목
-   * @param content 게시글 내용
-   * @returns 생성된 게시글
-   */
   createPost(author: string, title: string, content: string): PostModel {
     const newPost = {
       id: posts.length + 1,
@@ -58,11 +47,6 @@ export class PostsService {
     return newPost;
   }
 
-  /**
-   * [GET] /posts/:id 특정 게시글을 조회한다.
-   * @param id
-   * @returns 게시글
-   */
   getPostById(id: number): PostModel {
     const post = posts.find((post) => post.id === id);
     if (!post) {
@@ -73,16 +57,6 @@ export class PostsService {
     return post;
   }
 
-  /**
-   * [PUT] /posts/:id 특정 게시글을 수정한다.
-   * @param id 게시글 ID
-   * @param author 게시글 작성자
-   * @param title 게시글 제목
-   * @param content 게시글 내용
-   * @param likeCount 게시글 좋아요 수
-   * @param commentCount 게시글 댓글 수
-   * @returns 수정된 게시글
-   */
   updateOrCreatePost(
     id: number,
     author: string,
@@ -105,16 +79,6 @@ export class PostsService {
     return this.createPost(author, title, content);
   }
 
-  /**
-   * [PATCH] /posts/:id 특정 게시글을 수정한다.
-   * @param id 게시글 ID
-   * @param author 게시글 작성자
-   * @param title 게시글 제목
-   * @param content 게시글 내용
-   * @param likeCount 게시글 좋아요 수
-   * @param commentCount 게시글 댓글 수
-   * @returns 수정된 게시글
-   */
   updatePost(
     id: number,
     author?: string,
@@ -138,11 +102,6 @@ export class PostsService {
     return existingPost;
   }
 
-  /**
-   * [DELETE] /posts/:id 특정 게시글을 삭제한다.
-   * @param id
-   * @returns 삭제된 게시글
-   */
   deletePost(id: number): void {
     posts = posts.filter((post) => post.id !== id);
   }
