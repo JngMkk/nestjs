@@ -9,8 +9,11 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { CreatePostDto } from './dtos/create-post.dto';
+import { UpdatePostDto } from './dtos/patch-post.dto';
+import { UpdateOrCreatePostDto } from './dtos/put-post.dto';
+import { PostEntity } from './entities/posts.entity';
 import { PostsService } from './posts.service';
-import { PostModel } from './posts.interface';
 
 @Controller('posts')
 export class PostsController {
@@ -21,7 +24,7 @@ export class PostsController {
    * @returns 게시글 목록
    */
   @Get()
-  getPosts(): PostModel[] {
+  getPosts(): Promise<PostEntity[]> {
     return this.postsService.getPosts();
   }
 
@@ -33,12 +36,8 @@ export class PostsController {
    * @returns 생성된 게시글
    */
   @Post()
-  createPost(
-    @Body('author') author: string,
-    @Body('title') title: string,
-    @Body('content') content: string,
-  ): PostModel {
-    return this.postsService.createPost(author, title, content);
+  createPost(@Body() createPostDto: CreatePostDto): Promise<PostEntity> {
+    return this.postsService.createPost(createPostDto);
   }
 
   /**
@@ -47,8 +46,8 @@ export class PostsController {
    * @returns 게시글
    */
   @Get(':id')
-  getPost(@Param('id') id: string): PostModel {
-    return this.postsService.getPostById(+id);
+  getPost(@Param('id') id: string): Promise<PostEntity> {
+    return this.postsService.getPostById(id);
   }
 
   /**
@@ -64,20 +63,9 @@ export class PostsController {
   @Put(':id')
   updateOrCreatePost(
     @Param('id') id: string,
-    @Body('author') author: string,
-    @Body('title') title: string,
-    @Body('content') content: string,
-    @Body('likeCount') likeCount: string,
-    @Body('commentCount') commentCount: string,
-  ): PostModel {
-    return this.postsService.updateOrCreatePost(
-      +id,
-      author,
-      title,
-      content,
-      +likeCount,
-      +commentCount,
-    );
+    @Body() updateOrCreatePostDto: UpdateOrCreatePostDto,
+  ): Promise<PostEntity> {
+    return this.postsService.updateOrCreatePost(id, updateOrCreatePostDto);
   }
 
   /**
@@ -93,20 +81,9 @@ export class PostsController {
   @Patch(':id')
   updatePost(
     @Param('id') id: string,
-    @Body('author') author?: string,
-    @Body('title') title?: string,
-    @Body('content') content?: string,
-    @Body('likeCount') likeCount?: string,
-    @Body('commentCount') commentCount?: string,
-  ): PostModel {
-    return this.postsService.updatePost(
-      +id,
-      author,
-      title,
-      content,
-      likeCount ? +likeCount : undefined,
-      commentCount ? +commentCount : undefined,
-    );
+    @Body() updatePostDto: UpdatePostDto,
+  ): Promise<PostEntity> {
+    return this.postsService.updatePost(id, updatePostDto);
   }
 
   /**
@@ -116,7 +93,7 @@ export class PostsController {
    */
   @Delete(':id')
   @HttpCode(204)
-  deletePost(@Param('id') id: string): void {
-    return this.postsService.deletePost(+id);
+  deletePost(@Param('id') id: string): Promise<void> {
+    return this.postsService.deletePost(id);
   }
 }
