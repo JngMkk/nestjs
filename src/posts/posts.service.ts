@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostModel } from './posts.interface';
 
 let posts: PostModel[] = [
@@ -28,6 +28,7 @@ let posts: PostModel[] = [
   },
 ];
 
+@Injectable()
 export class PostsService {
   /**
    * [GET] /posts 모든 게시글을 조회한다.
