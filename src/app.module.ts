@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostEntity } from './posts/entities/posts.entity';
 import { PostsModule } from './posts/posts.module';
+import { UserEntity } from './users/entities/users.entity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -12,7 +14,6 @@ import { PostsModule } from './posts/posts.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    PostsModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -20,10 +21,12 @@ import { PostsModule } from './posts/posts.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [PostEntity],
+      entities: [UserEntity, PostEntity],
       // production 환경에서는 false로 설정
       synchronize: true,
     }),
+    UsersModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
