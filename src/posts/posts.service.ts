@@ -16,7 +16,9 @@ export class PostsService {
   ) {}
 
   async getPosts(): Promise<PostEntity[]> {
-    return await this.postRepository.find();
+    return await this.postRepository.find({
+      relations: ['author'],
+    });
   }
 
   async createPost(createPostDto: CreatePostDto): Promise<PostEntity> {
@@ -34,7 +36,10 @@ export class PostsService {
   }
 
   async getPostById(id: string): Promise<PostEntity> {
-    const post = await this.postRepository.findOne({ where: { id: +id } });
+    const post = await this.postRepository.findOne({
+      where: { id: +id },
+      relations: ['author'],
+    });
     if (!post) {
       // 기본 제공 Exception
       // https://docs.nestjs.com/exception-filters
