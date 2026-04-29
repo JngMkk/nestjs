@@ -66,7 +66,7 @@ export class AuthService {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, foundUser.password);
+    const isPasswordValid = bcrypt.compareSync(password, foundUser.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException(
         '이메일 또는 비밀번호가 일치하지 않습니다.',
@@ -96,11 +96,10 @@ export class AuthService {
    * @returns - 토큰 정보
    */
   async signup(signUpDto: SignupDto): Promise<ReadTokenDto> {
-    const hashedPassword = await bcrypt.hash(signUpDto.password, HASH_ROUNDS);
+    const hashedPassword = bcrypt.hashSync(signUpDto.password, HASH_ROUNDS);
 
     const newUser = await this.usersService.createUser({
-      nickname: signUpDto.nickname,
-      email: signUpDto.email,
+      ...signUpDto,
       password: hashedPassword,
     });
 
