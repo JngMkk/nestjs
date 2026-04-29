@@ -8,9 +8,8 @@ import {
   HASH_ROUNDS,
   REFRESH_TOKEN_EXPIRATION,
 } from './consts/auth.const';
-import { TokenType } from './consts/auth.enum';
+import { TokenHeader, TokenType } from './consts/auth.enum';
 import { ReadTokenDto } from './dtos/read-token.dto';
-import { SigninDto } from './dtos/signin.dto';
 import { SignupDto } from './dtos/signup.dto';
 
 @Injectable()
@@ -25,11 +24,10 @@ export class AuthService {
    * @param user - 사용자 정보
    * @returns - 토큰 정보
    */
-  async signin(signinDto: SigninDto): Promise<ReadTokenDto> {
-    const foundUser = await this.authenticate(
-      signinDto.email,
-      signinDto.password,
-    );
+  async signin(raw: string): Promise<ReadTokenDto> {
+    const base64Token = this.extractTokenFromHeader(raw);
+    const { email, password } = this.decodeBasicToken(base64Token);
+    const foundUser = await this.authenticate(email, password);
 
     return this.issueTokens(foundUser.id);
   }
@@ -107,5 +105,39 @@ export class AuthService {
     }
 
     return foundUser;
+  }
+
+  private extractTokenFromHeader(header: string): string {
+    const splitted = header.split(' ');
+    if (splitted.length !== 2) {
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+    }
+
+    const [type, token] = splitted;
+    if (
+      !Object.values(TokenHeader).includes(type.toLowerCase() as TokenHeader)
+    ) {
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+    }
+
+    return token;
+  }
+
+  private decodeBasicToken(base64Token: string): {
+    email: string;
+    password: string;
+  } {
+    const decoded = Buffer.from(base64Token, 'base64').toString('utf-8');
+    const splitted = decoded.split(':');
+    if (splitted.length !== 2) {
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+    }
+
+    const [email, password] = splitted;
+    if (!email || !password) {
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+    }
+
+    return { email, password };
   }
 }
