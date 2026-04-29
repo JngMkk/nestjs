@@ -22,7 +22,7 @@ export class PostsService {
   async createPost(createPostDto: CreatePostDto): Promise<PostEntity> {
     // 1) create
     const post = this.postRepository.create({
-      author: createPostDto.author,
+      author: { id: createPostDto.authorId },
       title: createPostDto.title,
       content: createPostDto.content,
       likeCount: 0,
@@ -56,7 +56,6 @@ export class PostsService {
       return await this.createPost(updateOrCreatePostDto);
     }
 
-    existingPost.author = updateOrCreatePostDto.author;
     existingPost.title = updateOrCreatePostDto.title;
     existingPost.content = updateOrCreatePostDto.content;
     existingPost.likeCount =
@@ -73,7 +72,6 @@ export class PostsService {
   ): Promise<PostEntity> {
     const existingPost = await this.getPostById(id);
 
-    existingPost.author = updatePostDto.author ?? existingPost.author;
     existingPost.title = updatePostDto.title ?? existingPost.title;
     existingPost.content = updatePostDto.content ?? existingPost.content;
     existingPost.likeCount = updatePostDto.likeCount ?? existingPost.likeCount;

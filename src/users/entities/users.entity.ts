@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { PostEntity } from 'src/posts/entities/posts.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { RoleEnum } from '../consts/role.enum';
 
 @Entity({ name: 'users' })
@@ -21,4 +22,10 @@ export class UserEntity {
     default: RoleEnum.USER,
   })
   role: RoleEnum;
+
+  @OneToMany(() => PostEntity, (post) => post.author, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  posts: PostEntity[];
 }

@@ -1,12 +1,20 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { UserEntity } from 'src/users/entities/users.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity({ name: 'posts' })
 export class PostEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  author: string;
+  @ManyToOne(() => UserEntity, (user) => user.posts, { nullable: false })
+  @JoinColumn({ name: 'author_id' })
+  author: UserEntity;
 
   @Column()
   title: string;
@@ -14,9 +22,9 @@ export class PostEntity {
   @Column()
   content: string;
 
-  @Column()
+  @Column({ name: 'like_count', default: 0 })
   likeCount: number;
 
-  @Column()
+  @Column({ name: 'comment_count', default: 0 })
   commentCount: number;
 }

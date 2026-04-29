@@ -1,5 +1,5 @@
 export class UpdateOrCreatePostDto {
-  author: string;
+  authorId: number;
   title: string;
   content: string;
   likeCount?: number;
