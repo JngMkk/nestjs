@@ -25,8 +25,6 @@ export class PostsService {
       author: { id: createPostDto.authorId },
       title: createPostDto.title,
       content: createPostDto.content,
-      likeCount: 0,
-      commentCount: 0,
     });
 
     // 2) save
