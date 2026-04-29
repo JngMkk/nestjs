@@ -25,7 +25,7 @@ export class AuthService {
    * @returns - 토큰 정보
    */
   async signin(raw: string): Promise<ReadTokenDto> {
-    const base64Token = this.extractTokenFromHeader(raw);
+    const base64Token = this.extractTokenFromHeader(raw, TokenHeader.BASIC);
     const { email, password } = this.decodeBasicToken(base64Token);
     const foundUser = await this.authenticate(email, password);
 
@@ -46,6 +46,28 @@ export class AuthService {
     });
 
     return this.issueTokens(newUser.id);
+  }
+
+  /**
+   * 토큰 갱신
+   * @param token - 토큰 (Refresh 토큰)
+   * @returns - 토큰 정보
+   */
+  rotateToken(token: string): ReadTokenDto {
+    const refreshToken = this.extractTokenFromHeader(token, TokenHeader.BEARER);
+
+    let payload: { sub: number; type: TokenType };
+    try {
+      payload = this.verifyToken(refreshToken);
+    } catch {
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+    }
+
+    if (payload.type !== TokenType.REFRESH) {
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+    }
+
+    return this.issueTokens(payload.sub);
   }
 
   /**
@@ -107,16 +129,17 @@ export class AuthService {
     return foundUser;
   }
 
-  private extractTokenFromHeader(header: string): string {
+  private extractTokenFromHeader(
+    header: string,
+    expectedType: TokenHeader,
+  ): string {
     const splitted = header.split(' ');
     if (splitted.length !== 2) {
       throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
 
     const [type, token] = splitted;
-    if (
-      !Object.values(TokenHeader).includes(type.toLowerCase() as TokenHeader)
-    ) {
+    if (type.toLowerCase() !== expectedType) {
       throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
 
@@ -139,5 +162,16 @@ export class AuthService {
     }
 
     return { email, password };
+  }
+
+  /**
+   * 토큰 검증
+   * @param token - 토큰 (Bearer 토큰)
+   * @returns - 토큰 페이로드
+   */
+  private verifyToken(token: string): { sub: number; type: TokenType } {
+    return this.jwtService.verify(token, {
+      secret: process.env.TOKEN_SECRET,
+    });
   }
 }

@@ -16,4 +16,9 @@ export class AuthController {
   signin(@Headers('Authorization') raw: string): Promise<ReadTokenDto> {
     return this.authService.signin(raw);
   }
+
+  @Post('refresh')
+  refresh(@Headers('Authorization') raw: string): ReadTokenDto {
+    return this.authService.rotateToken(raw);
+  }
 }
