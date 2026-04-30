@@ -6,12 +6,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dtos/create-post.dto';
-import { UpdatePostDto } from './dtos/patch-post.dto';
-import { UpdateOrCreatePostDto } from './dtos/put-post.dto';
-import { PostEntity } from './entities/posts.entity';
+import { UpdatePostDto } from './dtos/update-post.dto';
+import { UpsertPostDto } from './dtos/upsert-post.dto';
+import { PostEntity } from './entities/post.entity';
 
 @Injectable()
-export class PostsService {
+export class PostService {
   constructor(
     // repository를 사용하기 위해서는 InjectRepository 데코레이터를 사용해야 함
     // model을 기반으로 repository를 생성
@@ -55,7 +55,7 @@ export class PostsService {
   async updateOrCreatePost(
     id: number,
     userId: number,
-    updateOrCreatePostDto: UpdateOrCreatePostDto,
+    updateOrCreatePostDto: UpsertPostDto,
   ): Promise<PostEntity> {
     const existingPost = await this.findPostById(id);
     if (!existingPost) {

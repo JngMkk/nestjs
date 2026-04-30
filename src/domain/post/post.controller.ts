@@ -17,14 +17,14 @@ import { Payload } from 'src/core/auth/decorators/payload.decorator';
 import { AccessTokenGuard } from 'src/core/auth/guards/access-token.guard';
 import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { CreatePostDto } from './dtos/create-post.dto';
-import { UpdatePostDto } from './dtos/patch-post.dto';
-import { UpdateOrCreatePostDto } from './dtos/put-post.dto';
-import { PostEntity } from './entities/posts.entity';
-import { PostsService } from './posts.service';
+import { UpdatePostDto } from './dtos/update-post.dto';
+import { UpsertPostDto } from './dtos/upsert-post.dto';
+import { PostEntity } from './entities/post.entity';
+import { PostService } from './post.service';
 
 @Controller('posts')
-export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+export class PostController {
+  constructor(private readonly postService: PostService) {}
 
   /**
    * [GET] /posts 모든 게시글을 조회한다.
@@ -34,7 +34,7 @@ export class PostsController {
   @UseGuards(AccessTokenGuard)
   @Get()
   getPosts(): Promise<PostEntity[]> {
-    return this.postsService.getPosts();
+    return this.postService.getPosts();
   }
 
   /**
@@ -52,7 +52,7 @@ export class PostsController {
     @Payload() payload: TokenPayload,
     @Body() createPostDto: CreatePostDto,
   ): Promise<PostEntity> {
-    return this.postsService.createPost(payload.sub, createPostDto);
+    return this.postService.createPost(payload.sub, createPostDto);
   }
 
   /**
@@ -64,7 +64,7 @@ export class PostsController {
   @UseGuards(AccessTokenGuard)
   @Get(':id')
   getPost(@Param('id', ParseIntPipe) id: number): Promise<PostEntity> {
-    return this.postsService.getPostById(id);
+    return this.postService.getPostById(id);
   }
 
   /**
@@ -83,12 +83,12 @@ export class PostsController {
   updateOrCreatePost(
     @Param('id', ParseIntPipe) id: number,
     @Payload() payload: TokenPayload,
-    @Body() updateOrCreatePostDto: UpdateOrCreatePostDto,
+    @Body() upsertPostDto: UpsertPostDto,
   ): Promise<PostEntity> {
-    return this.postsService.updateOrCreatePost(
+    return this.postService.updateOrCreatePost(
       id,
       payload.sub,
-      updateOrCreatePostDto,
+      upsertPostDto,
     );
   }
 
@@ -110,7 +110,7 @@ export class PostsController {
     @Payload() payload: TokenPayload,
     @Body() updatePostDto: UpdatePostDto,
   ): Promise<PostEntity> {
-    return this.postsService.updatePost(id, payload.sub, updatePostDto);
+    return this.postService.updatePost(id, payload.sub, updatePostDto);
   }
 
   /**
@@ -126,6 +126,6 @@ export class PostsController {
     @Param('id', ParseIntPipe) id: number,
     @Payload() payload: TokenPayload,
   ): Promise<void> {
-    return this.postsService.deletePost(id, payload.sub);
+    return this.postService.deletePost(id, payload.sub);
   }
 }

@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
-import { UserEntity } from './entities/users.entity';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,

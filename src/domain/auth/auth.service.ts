@@ -3,8 +3,8 @@ import * as bcrypt from 'bcrypt';
 import { decodeBase64 } from 'src/common/utils/base64.util';
 import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { JwtService } from 'src/core/jwt/jwt.service';
-import { UserEntity } from 'src/domain/users/entities/users.entity';
-import { UsersService } from 'src/domain/users/users.service';
+import { UserEntity } from 'src/domain/user/entities/user.entity';
+import { UserService } from 'src/domain/user/user.service';
 import { HASH_ROUNDS } from './consts/auth.const';
 import { ReadTokenDto } from './dtos/read-token.dto';
 import { SignupDto } from './dtos/signup.dto';
@@ -12,7 +12,7 @@ import { SignupDto } from './dtos/signup.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -34,7 +34,7 @@ export class AuthService {
   async signup(signUpDto: SignupDto): Promise<ReadTokenDto> {
     const hashedPassword = bcrypt.hashSync(signUpDto.password, HASH_ROUNDS);
 
-    const newUser = await this.usersService.createUser({
+    const newUser = await this.userService.createUser({
       ...signUpDto,
       password: hashedPassword,
     });
@@ -79,7 +79,7 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<UserEntity> {
-    const foundUser = await this.usersService.findUserByCondition({
+    const foundUser = await this.userService.findUserByCondition({
       email,
     });
     if (!foundUser) {
