@@ -1,20 +1,19 @@
 import {
   CanActivate,
   ExecutionContext,
-  Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
+import { TokenHeader } from 'src/core/jwt/consts/jwt.enum';
 import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { JwtService } from 'src/core/jwt/jwt.service';
-import { TokenHeader } from 'src/core/jwt/consts/jwt.enum';
 
 /**
- * HTTP Bearer 헤더 형식을 확인하고 JWT를 검증한 뒤 payload를 req.user에 설정한다.
+ * Bearer 헤더 형식 확인 및 JWT 검증 후 req.payload를 설정하는 추상 Guard.
+ * 토큰 타입 검증은 하위 클래스에서 담당한다.
  */
-@Injectable()
-export class BearerTokenGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+export abstract class BearerTokenGuard implements CanActivate {
+  constructor(protected readonly jwtService: JwtService) {}
 
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest<Request>();
@@ -40,8 +39,11 @@ export class BearerTokenGuard implements CanActivate {
       throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
 
+    this.validateTokenType(payload);
     (req as Request & { payload: TokenPayload }).payload = payload;
 
     return true;
   }
+
+  protected abstract validateTokenType(payload: TokenPayload): void;
 }

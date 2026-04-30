@@ -2,7 +2,7 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { BasicToken } from 'src/core/auth/decorators/basic-token.decorator';
 import { Payload } from 'src/core/auth/decorators/payload.decorator';
 import { BasicTokenGuard } from 'src/core/auth/guards/basic-token.guard';
-import { BearerTokenGuard } from 'src/core/auth/guards/bearer-token.guard';
+import { RefreshTokenGuard } from 'src/core/auth/guards/refresh-token.guard';
 import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { AuthService } from './auth.service';
 import { ReadTokenDto } from './dtos/read-token.dto';
@@ -24,7 +24,7 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(BearerTokenGuard)
+  @UseGuards(RefreshTokenGuard)
   refresh(@Payload() payload: TokenPayload): ReadTokenDto {
     return this.authService.rotateToken(payload);
   }

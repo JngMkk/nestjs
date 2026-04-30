@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { decodeBase64 } from 'src/common/utils/base64.util';
-import { TokenType } from 'src/core/jwt/consts/jwt.enum';
 import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { JwtService } from 'src/core/jwt/jwt.service';
 import { UserEntity } from 'src/domain/users/entities/users.entity';
@@ -45,14 +44,10 @@ export class AuthService {
 
   /**
    * 토큰 갱신
-   * @param payload - BearerTokenGuard가 검증한 토큰 페이로드
+   * @param payload - RefreshTokenGuard가 검증한 토큰 페이로드
    * @returns 새로운 액세스 토큰 및 리프레시 토큰
    */
   rotateToken(payload: TokenPayload): ReadTokenDto {
-    if (payload.type !== TokenType.REFRESH) {
-      throw new UnauthorizedException('리프레시 토큰이 아닙니다.');
-    }
-
     return this.jwtService.issueTokens(payload.sub);
   }
 
