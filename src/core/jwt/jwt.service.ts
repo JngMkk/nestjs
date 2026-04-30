@@ -3,8 +3,9 @@ import { JwtService as NestJwtService } from '@nestjs/jwt';
 import {
   ACCESS_TOKEN_EXPIRATION,
   REFRESH_TOKEN_EXPIRATION,
+  TOKEN_TYPE,
+  TokenType,
 } from './consts/jwt.const';
-import { TokenType } from './consts/jwt.enum';
 import { TokenPayload } from './interfaces/jwt.interface';
 
 @Injectable()
@@ -29,8 +30,8 @@ export class JwtService {
    */
   issueTokens(id: number): { accessToken: string; refreshToken: string } {
     return {
-      accessToken: this.signToken(id, TokenType.ACCESS),
-      refreshToken: this.signToken(id, TokenType.REFRESH),
+      accessToken: this.signToken(id, TOKEN_TYPE.ACCESS),
+      refreshToken: this.signToken(id, TOKEN_TYPE.REFRESH),
     };
   }
 
@@ -42,7 +43,7 @@ export class JwtService {
    */
   private signToken(sub: number, type: TokenType): string {
     const expiresIn =
-      type === TokenType.ACCESS
+      type === TOKEN_TYPE.ACCESS
         ? ACCESS_TOKEN_EXPIRATION
         : REFRESH_TOKEN_EXPIRATION;
 

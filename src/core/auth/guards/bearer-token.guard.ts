@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { TokenHeader } from 'src/core/jwt/consts/jwt.enum';
+import { TOKEN_HEADER } from 'src/core/jwt/consts/jwt.const';
 import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { JwtService } from 'src/core/jwt/jwt.service';
 
@@ -26,7 +26,7 @@ export abstract class BearerTokenGuard implements CanActivate {
     const parts = raw.split(' ');
     if (
       parts.length !== 2 ||
-      parts[0].toLowerCase() !== TokenHeader.BEARER ||
+      parts[0].toLowerCase() !== TOKEN_HEADER.BEARER ||
       !parts[1]
     ) {
       throw new UnauthorizedException('유효하지 않은 Bearer 토큰 형식입니다.');

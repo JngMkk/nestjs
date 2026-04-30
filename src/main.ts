@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app/app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app/app.module';
+import { API_AUTH_TYPE } from './common/consts/swagger.const';
 
 /**
  * Nest Application 시작점
@@ -14,6 +15,9 @@ async function bootstrap() {
     .setDescription('NestJS API description')
     .setVersion('1.0')
     .addTag('NestJS')
+    .addBasicAuth(undefined, API_AUTH_TYPE.BASIC)
+    .addBearerAuth(undefined, API_AUTH_TYPE.ACCESS)
+    .addBearerAuth(undefined, API_AUTH_TYPE.REFRESH)
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, documentFactory);

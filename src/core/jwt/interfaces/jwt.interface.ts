@@ -1,4 +1,4 @@
-import { TokenType } from '../consts/jwt.enum';
+import { TokenType } from '../consts/jwt.const';
 
 export interface TokenPayload {
   sub: number;

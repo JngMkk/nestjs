@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { TokenHeader } from 'src/core/jwt/consts/jwt.enum';
+import { TOKEN_HEADER } from 'src/core/jwt/consts/jwt.const';
 
 /**
  * HTTP Basic 헤더 형식만 확인한다.
@@ -24,7 +24,7 @@ export class BasicTokenGuard implements CanActivate {
     const parts = raw.split(' ');
     if (
       parts.length !== 2 ||
-      parts[0].toLowerCase() !== TokenHeader.BASIC ||
+      parts[0].toLowerCase() !== TOKEN_HEADER.BASIC ||
       !parts[1]
     ) {
       throw new UnauthorizedException('유효하지 않은 Basic 토큰 형식입니다.');
