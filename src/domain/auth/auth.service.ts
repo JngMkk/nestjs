@@ -79,7 +79,9 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<UserEntity> {
-    const foundUser = await this.usersService.getUserByEmail(email);
+    const foundUser = await this.usersService.findUserByCondition({
+      email,
+    });
     if (!foundUser) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
