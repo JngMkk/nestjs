@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { TOKEN_HEADER } from 'src/core/jwt/consts/jwt.const';
+import { TOKEN_HEADER } from 'src/core/auth/consts/auth-core.const';
 
 /**
  * HTTP Basic 헤더 형식만 확인한다.

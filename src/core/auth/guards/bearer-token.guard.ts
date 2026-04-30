@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { TOKEN_HEADER } from 'src/core/jwt/consts/jwt.const';
+import { TOKEN_HEADER } from 'src/core/auth/consts/auth-core.const';
 import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { JwtService } from 'src/core/jwt/jwt.service';
 

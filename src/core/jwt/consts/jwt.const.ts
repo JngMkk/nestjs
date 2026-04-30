@@ -7,8 +7,3 @@ export const TOKEN_TYPE = {
 } as const;
 
 export type TokenType = (typeof TOKEN_TYPE)[keyof typeof TOKEN_TYPE];
-
-export const TOKEN_HEADER = {
-  BEARER: 'bearer',
-  BASIC: 'basic',
-} as const;
