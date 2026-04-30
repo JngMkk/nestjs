@@ -1,12 +1,10 @@
+import { BaseEntity } from 'src/common/entities/base.entity';
 import { PostEntity } from 'src/posts/entities/posts.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { RoleEnum } from '../consts/role.enum';
 
 @Entity({ name: 'users' })
-export class UserEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class UserEntity extends BaseEntity {
   @Column({ unique: true, length: 20 })
   nickname: string;
 
