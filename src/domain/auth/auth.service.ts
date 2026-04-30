@@ -1,7 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { decodeBase64 } from 'src/common/utils/base64.util';
+import { TokenType } from 'src/core/jwt/consts/jwt.enum';
+import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { JwtService } from 'src/core/jwt/jwt.service';
-import { TokenHeader, TokenType } from 'src/core/jwt/consts/jwt.enum';
 import { UserEntity } from 'src/domain/users/entities/users.entity';
 import { UsersService } from 'src/domain/users/users.service';
 import { HASH_ROUNDS } from './consts/auth.const';
@@ -17,15 +19,12 @@ export class AuthService {
 
   /**
    * 로그인
-   * @param raw - Authorization 헤더 값 (Basic base64(email:password))
+   * @param token - Basic 토큰 (base64(email:password))
    * @returns 액세스 토큰 및 리프레시 토큰
    */
-  async signin(raw: string): Promise<ReadTokenDto> {
-    const base64Token = this.extractTokenFromHeader(raw, TokenHeader.BASIC);
-    const { email, password } = this.decodeBasicToken(base64Token);
-    const foundUser = await this.authenticate(email, password);
-
-    return this.jwtService.issueTokens(foundUser.id);
+  async signin(token: string): Promise<ReadTokenDto> {
+    const user = await this.verifyBasicCredentials(token);
+    return this.jwtService.issueTokens(user.id);
   }
 
   /**
@@ -46,64 +45,33 @@ export class AuthService {
 
   /**
    * 토큰 갱신
-   * @param token - Authorization 헤더 값 (Bearer 리프레시 토큰)
+   * @param payload - BearerTokenGuard가 검증한 토큰 페이로드
    * @returns 새로운 액세스 토큰 및 리프레시 토큰
    */
-  rotateToken(token: string): ReadTokenDto {
-    const refreshToken = this.extractTokenFromHeader(token, TokenHeader.BEARER);
-
-    let payload: { sub: number; type: TokenType };
-    try {
-      payload = this.jwtService.verifyToken(refreshToken);
-    } catch {
-      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
-    }
-
+  rotateToken(payload: TokenPayload): ReadTokenDto {
     if (payload.type !== TokenType.REFRESH) {
-      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+      throw new UnauthorizedException('리프레시 토큰이 아닙니다.');
     }
 
     return this.jwtService.issueTokens(payload.sub);
   }
 
   /**
-   * Authorization 헤더에서 토큰 추출
-   * @param header - Authorization 헤더 값
-   * @param expectedType - 기대하는 토큰 타입 (Basic | Bearer)
-   * @returns 추출된 토큰 문자열
+   * Basic 자격증명을 검증하고 사용자를 반환한다.
+   * @param token - Basic 토큰 (base64(email:password))
+   * @returns 인증된 사용자 엔티티
    */
-  private extractTokenFromHeader(header: string, expectedType: TokenHeader): string {
-    const splitted = header.split(' ');
-    if (splitted.length !== 2) {
+  private async verifyBasicCredentials(token: string): Promise<UserEntity> {
+    const decoded = decodeBase64(token);
+    const parts = decoded.split(':');
+
+    // email:password 형식 검증
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
       throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
 
-    const [type, token] = splitted;
-    if (type.toLowerCase() !== expectedType) {
-      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
-    }
-
-    return token;
-  }
-
-  /**
-   * Basic 토큰 디코딩
-   * @param base64Token - Base64 인코딩된 토큰 (email:password)
-   * @returns 이메일과 비밀번호
-   */
-  private decodeBasicToken(base64Token: string): { email: string; password: string } {
-    const decoded = Buffer.from(base64Token, 'base64').toString('utf-8');
-    const splitted = decoded.split(':');
-    if (splitted.length !== 2) {
-      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
-    }
-
-    const [email, password] = splitted;
-    if (!email || !password) {
-      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
-    }
-
-    return { email, password };
+    const [email, password] = parts;
+    return this.authenticate(email, password);
   }
 
   /**
@@ -112,7 +80,10 @@ export class AuthService {
    * @param password - 사용자 비밀번호 (평문)
    * @returns 인증된 사용자 엔티티
    */
-  private async authenticate(email: string, password: string): Promise<UserEntity> {
+  private async authenticate(
+    email: string,
+    password: string,
+  ): Promise<UserEntity> {
     const foundUser = await this.usersService.getUserByEmail(email);
     if (!foundUser) {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
@@ -120,7 +91,9 @@ export class AuthService {
 
     const isPasswordValid = bcrypt.compareSync(password, foundUser.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다.');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 일치하지 않습니다.',
+      );
     }
 
     return foundUser;

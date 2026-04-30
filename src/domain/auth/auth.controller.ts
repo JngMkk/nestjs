@@ -1,4 +1,9 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { BasicToken } from 'src/core/auth/decorators/basic-token.decorator';
+import { Payload } from 'src/core/auth/decorators/payload.decorator';
+import { BasicTokenGuard } from 'src/core/auth/guards/basic-token.guard';
+import { BearerTokenGuard } from 'src/core/auth/guards/bearer-token.guard';
+import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { AuthService } from './auth.service';
 import { ReadTokenDto } from './dtos/read-token.dto';
 import { SignupDto } from './dtos/signup.dto';
@@ -13,12 +18,14 @@ export class AuthController {
   }
 
   @Post('signin')
-  signin(@Headers('Authorization') raw: string): Promise<ReadTokenDto> {
-    return this.authService.signin(raw);
+  @UseGuards(BasicTokenGuard)
+  signin(@BasicToken() token: string): Promise<ReadTokenDto> {
+    return this.authService.signin(token);
   }
 
   @Post('refresh')
-  refresh(@Headers('Authorization') raw: string): ReadTokenDto {
-    return this.authService.rotateToken(raw);
+  @UseGuards(BearerTokenGuard)
+  refresh(@Payload() payload: TokenPayload): ReadTokenDto {
+    return this.authService.rotateToken(payload);
   }
 }
