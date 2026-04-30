@@ -1,5 +1,5 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { UserEntity } from 'src/users/entities/users.entity';
+import { UserEntity } from 'src/domain/users/entities/users.entity';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity({ name: 'posts' })

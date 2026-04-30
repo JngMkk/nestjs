@@ -1,5 +1,5 @@
 import { BaseEntity } from 'src/common/entities/base.entity';
-import { PostEntity } from 'src/posts/entities/posts.entity';
+import { PostEntity } from 'src/domain/posts/entities/posts.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { RoleEnum } from '../consts/role.enum';
 
