@@ -7,6 +7,11 @@ import { RefreshTokenGuard } from './guards/refresh-token.guard';
 @Module({
   imports: [JwtCoreModule],
   providers: [BasicTokenGuard, RefreshTokenGuard, AccessTokenGuard],
-  exports: [BasicTokenGuard, RefreshTokenGuard, AccessTokenGuard],
+  exports: [
+    BasicTokenGuard,
+    RefreshTokenGuard,
+    AccessTokenGuard,
+    JwtCoreModule,
+  ],
 })
 export class AuthCoreModule {}
