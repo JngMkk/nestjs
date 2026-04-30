@@ -1,7 +1,8 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LogInterceptor } from 'src/core/logger/interceptors/log.interceptor';
 import {
   ENV_DB_DATABASE_KEY,
   ENV_DB_HOST_KEY,
@@ -21,16 +22,18 @@ import { UserModule } from '../domain/user/user.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env[ENV_DB_HOST_KEY],
-      port: parseInt(process.env[ENV_DB_PORT_KEY] ?? '5432'),
-      username: process.env[ENV_DB_USERNAME_KEY],
-      password: process.env[ENV_DB_PASSWORD_KEY],
-      database: process.env[ENV_DB_DATABASE_KEY],
-      entities: [UserEntity, PostEntity],
-      // production 환경에서는 false로 설정
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get<string>(ENV_DB_HOST_KEY),
+        port: config.get<number>(ENV_DB_PORT_KEY),
+        username: config.get<string>(ENV_DB_USERNAME_KEY),
+        password: config.get<string>(ENV_DB_PASSWORD_KEY),
+        database: config.get<string>(ENV_DB_DATABASE_KEY),
+        entities: [UserEntity, PostEntity],
+        synchronize: true,
+      }),
     }),
     UserModule,
     PostModule,
@@ -39,6 +42,8 @@ import { UserModule } from '../domain/user/user.module';
   providers: [
     // 모든 응답에서 클래스 인스턴스를 직렬화
     { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
+    // 모든 요청과 응답에 대한 로깅
+    { provide: APP_INTERCEPTOR, useClass: LogInterceptor },
   ],
 })
 export class AppModule {}
