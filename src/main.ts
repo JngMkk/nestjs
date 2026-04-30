@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { API_AUTH_TYPE } from './common/consts/swagger.const';
 import { ENV_SERVER_PORT_KEY } from './core/config/consts/config.const';
+import { HttpExceptionFilter } from './core/exception/exception-filters/http.exception-filter';
 
 /**
  * Nest Application 시작점
@@ -12,6 +13,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // https://docs.nestjs.com/openapi/introduction
   const config = new DocumentBuilder()
