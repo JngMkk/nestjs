@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dtos/create-post.dto';
@@ -21,10 +25,13 @@ export class PostsService {
     });
   }
 
-  async createPost(createPostDto: CreatePostDto): Promise<PostEntity> {
+  async createPost(
+    userId: number,
+    createPostDto: CreatePostDto,
+  ): Promise<PostEntity> {
     // 1) create
     const post = this.postRepository.create({
-      author: { id: createPostDto.authorId },
+      author: { id: userId },
       title: createPostDto.title,
       content: createPostDto.content,
     });
@@ -35,11 +42,8 @@ export class PostsService {
     return newPost;
   }
 
-  async getPostById(id: string): Promise<PostEntity> {
-    const post = await this.postRepository.findOne({
-      where: { id: +id },
-      relations: ['author'],
-    });
+  async getPostById(id: number): Promise<PostEntity> {
+    const post = await this.findPostById(id);
     if (!post) {
       // 기본 제공 Exception
       // https://docs.nestjs.com/exception-filters
@@ -49,14 +53,17 @@ export class PostsService {
   }
 
   async updateOrCreatePost(
-    id: string,
+    id: number,
+    userId: number,
     updateOrCreatePostDto: UpdateOrCreatePostDto,
   ): Promise<PostEntity> {
-    const existingPost = await this.postRepository.findOne({
-      where: { id: +id },
-    });
+    const existingPost = await this.findPostById(id);
     if (!existingPost) {
-      return await this.createPost(updateOrCreatePostDto);
+      return await this.createPost(userId, updateOrCreatePostDto);
+    }
+
+    if (existingPost.author.id !== userId) {
+      throw new ForbiddenException('게시글 수정 권한이 없습니다.');
     }
 
     existingPost.title = updateOrCreatePostDto.title;
@@ -70,10 +77,14 @@ export class PostsService {
   }
 
   async updatePost(
-    id: string,
+    id: number,
+    userId: number,
     updatePostDto: UpdatePostDto,
   ): Promise<PostEntity> {
     const existingPost = await this.getPostById(id);
+    if (existingPost.author.id !== userId) {
+      throw new ForbiddenException('게시글 수정 권한이 없습니다.');
+    }
 
     existingPost.title = updatePostDto.title ?? existingPost.title;
     existingPost.content = updatePostDto.content ?? existingPost.content;
@@ -84,7 +95,23 @@ export class PostsService {
     return await this.postRepository.save(existingPost);
   }
 
-  async deletePost(id: string): Promise<void> {
+  async deletePost(id: number, userId: number): Promise<void> {
+    const existingPost = await this.findPostById(id);
+    if (!existingPost) {
+      return;
+    }
+
+    if (existingPost.author.id !== userId) {
+      throw new ForbiddenException('게시글 삭제 권한이 없습니다.');
+    }
+
     await this.postRepository.delete(id);
+  }
+
+  private async findPostById(id: number): Promise<PostEntity | null> {
+    return await this.postRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
   }
 }

@@ -1,4 +1,6 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { ApiBasicAuth, ApiBearerAuth } from '@nestjs/swagger';
+import { API_AUTH_TYPE } from 'src/common/consts/swagger.const';
 import { BasicToken } from 'src/core/auth/decorators/basic-token.decorator';
 import { Payload } from 'src/core/auth/decorators/payload.decorator';
 import { BasicTokenGuard } from 'src/core/auth/guards/basic-token.guard';
@@ -17,14 +19,16 @@ export class AuthController {
     return this.authService.signup(signUpDto);
   }
 
-  @Post('signin')
+  @ApiBasicAuth(API_AUTH_TYPE.BASIC)
   @UseGuards(BasicTokenGuard)
+  @Post('signin')
   signin(@BasicToken() token: string): Promise<ReadTokenDto> {
     return this.authService.signin(token);
   }
 
-  @Post('refresh')
+  @ApiBearerAuth(API_AUTH_TYPE.REFRESH)
   @UseGuards(RefreshTokenGuard)
+  @Post('refresh')
   refresh(@Payload() payload: TokenPayload): ReadTokenDto {
     return this.authService.rotateToken(payload);
   }

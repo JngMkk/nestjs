@@ -1,6 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserEntity } from './entities/users.entity';
 
 @Injectable()
@@ -28,15 +32,21 @@ export class UsersService {
     }
 
     const newUser = this.userRepository.create(user);
-
     return await this.userRepository.save(newUser);
   }
 
-  async getUsers(): Promise<UserEntity[]> {
-    return await this.userRepository.find();
+  async getMe(userId: number): Promise<UserEntity> {
+    const user = await this.findUserByCondition({ id: userId });
+    if (!user) {
+      throw new UnauthorizedException('잘못된 토큰입니다.');
+    }
+
+    return user;
   }
 
-  async getUserByEmail(email: string): Promise<UserEntity | null> {
-    return await this.userRepository.findOne({ where: { email } });
+  async findUserByCondition(
+    condition: FindOptionsWhere<UserEntity>,
+  ): Promise<UserEntity | null> {
+    return await this.userRepository.findOne({ where: condition });
   }
 }

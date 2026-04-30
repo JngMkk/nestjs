@@ -5,10 +5,17 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { API_AUTH_TYPE } from 'src/common/consts/swagger.const';
+import { Payload } from 'src/core/auth/decorators/payload.decorator';
+import { AccessTokenGuard } from 'src/core/auth/guards/access-token.guard';
+import { TokenPayload } from 'src/core/jwt/interfaces/jwt.interface';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { UpdatePostDto } from './dtos/patch-post.dto';
 import { UpdateOrCreatePostDto } from './dtos/put-post.dto';
@@ -23,6 +30,8 @@ export class PostsController {
    * [GET] /posts 모든 게시글을 조회한다.
    * @returns 게시글 목록
    */
+  @ApiBearerAuth(API_AUTH_TYPE.ACCESS)
+  @UseGuards(AccessTokenGuard)
   @Get()
   getPosts(): Promise<PostEntity[]> {
     return this.postsService.getPosts();
@@ -35,9 +44,15 @@ export class PostsController {
    * @param content 게시글 내용
    * @returns 생성된 게시글
    */
+  @ApiBearerAuth(API_AUTH_TYPE.ACCESS)
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(201)
   @Post()
-  createPost(@Body() createPostDto: CreatePostDto): Promise<PostEntity> {
-    return this.postsService.createPost(createPostDto);
+  createPost(
+    @Payload() payload: TokenPayload,
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<PostEntity> {
+    return this.postsService.createPost(payload.sub, createPostDto);
   }
 
   /**
@@ -45,8 +60,10 @@ export class PostsController {
    * @param id
    * @returns 게시글
    */
+  @ApiBearerAuth(API_AUTH_TYPE.ACCESS)
+  @UseGuards(AccessTokenGuard)
   @Get(':id')
-  getPost(@Param('id') id: string): Promise<PostEntity> {
+  getPost(@Param('id', ParseIntPipe) id: number): Promise<PostEntity> {
     return this.postsService.getPostById(id);
   }
 
@@ -60,12 +77,19 @@ export class PostsController {
    * @param commentCount 게시글 댓글 수
    * @returns 수정 또는 생성된 게시글
    */
+  @ApiBearerAuth(API_AUTH_TYPE.ACCESS)
+  @UseGuards(AccessTokenGuard)
   @Put(':id')
   updateOrCreatePost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Payload() payload: TokenPayload,
     @Body() updateOrCreatePostDto: UpdateOrCreatePostDto,
   ): Promise<PostEntity> {
-    return this.postsService.updateOrCreatePost(id, updateOrCreatePostDto);
+    return this.postsService.updateOrCreatePost(
+      id,
+      payload.sub,
+      updateOrCreatePostDto,
+    );
   }
 
   /**
@@ -78,12 +102,15 @@ export class PostsController {
    * @param commentCount 게시글 댓글 수
    * @returns 수정된 게시글
    */
+  @ApiBearerAuth(API_AUTH_TYPE.ACCESS)
+  @UseGuards(AccessTokenGuard)
   @Patch(':id')
   updatePost(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
+    @Payload() payload: TokenPayload,
     @Body() updatePostDto: UpdatePostDto,
   ): Promise<PostEntity> {
-    return this.postsService.updatePost(id, updatePostDto);
+    return this.postsService.updatePost(id, payload.sub, updatePostDto);
   }
 
   /**
@@ -91,9 +118,14 @@ export class PostsController {
    * @param id
    * @returns 삭제된 게시글
    */
-  @Delete(':id')
+  @ApiBearerAuth(API_AUTH_TYPE.ACCESS)
+  @UseGuards(AccessTokenGuard)
   @HttpCode(204)
-  deletePost(@Param('id') id: string): Promise<void> {
-    return this.postsService.deletePost(id);
+  @Delete(':id')
+  deletePost(
+    @Param('id', ParseIntPipe) id: number,
+    @Payload() payload: TokenPayload,
+  ): Promise<void> {
+    return this.postsService.deletePost(id, payload.sub);
   }
 }
