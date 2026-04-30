@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
@@ -8,6 +9,8 @@ import { API_AUTH_TYPE } from './common/consts/swagger.const';
  */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(new ValidationPipe());
 
   // https://docs.nestjs.com/openapi/introduction
   const config = new DocumentBuilder()

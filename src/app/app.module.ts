@@ -1,11 +1,12 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../domain/auth/auth.module';
-import { PostEntity } from '../domain/posts/entities/posts.entity';
-import { PostsModule } from '../domain/posts/posts.module';
-import { UserEntity } from '../domain/users/entities/users.entity';
-import { UsersModule } from '../domain/users/users.module';
+import { PostEntity } from '../domain/post/entities/post.entity';
+import { PostModule } from '../domain/post/post.module';
+import { UserEntity } from '../domain/user/entities/user.entity';
+import { UserModule } from '../domain/user/user.module';
 
 @Module({
   imports: [
@@ -24,9 +25,13 @@ import { UsersModule } from '../domain/users/users.module';
       // production 환경에서는 false로 설정
       synchronize: true,
     }),
-    UsersModule,
-    PostsModule,
+    UserModule,
+    PostModule,
     AuthModule,
+  ],
+  providers: [
+    // 모든 응답에서 클래스 인스턴스를 직렬화
+    { provide: APP_INTERCEPTOR, useClass: ClassSerializerInterceptor },
   ],
 })
 export class AppModule {}
