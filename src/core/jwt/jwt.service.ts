@@ -54,7 +54,10 @@ export class JwtService {
 
     return this.jwtService.sign(
       { sub, type },
-      { secret: process.env.TOKEN_SECRET, expiresIn },
+      {
+        secret: this.configService.get<string>(ENV_TOKEN_SECRET_KEY),
+        expiresIn,
+      },
     );
   }
 }
