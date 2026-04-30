@@ -2,6 +2,13 @@ import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import {
+  ENV_DB_DATABASE_KEY,
+  ENV_DB_HOST_KEY,
+  ENV_DB_PASSWORD_KEY,
+  ENV_DB_PORT_KEY,
+  ENV_DB_USERNAME_KEY,
+} from '../core/config/consts/config.const';
 import { AuthModule } from '../domain/auth/auth.module';
 import { PostEntity } from '../domain/post/entities/post.entity';
 import { PostModule } from '../domain/post/post.module';
@@ -16,11 +23,11 @@ import { UserModule } from '../domain/user/user.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT ?? '5432'),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
+      host: process.env[ENV_DB_HOST_KEY],
+      port: parseInt(process.env[ENV_DB_PORT_KEY] ?? '5432'),
+      username: process.env[ENV_DB_USERNAME_KEY],
+      password: process.env[ENV_DB_PASSWORD_KEY],
+      database: process.env[ENV_DB_DATABASE_KEY],
       entities: [UserEntity, PostEntity],
       // production 환경에서는 false로 설정
       synchronize: true,

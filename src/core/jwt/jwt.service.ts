@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
+import { ENV_TOKEN_SECRET_KEY } from '../config/consts/config.const';
 import {
   ACCESS_TOKEN_EXPIRATION,
   REFRESH_TOKEN_EXPIRATION,
@@ -10,7 +12,10 @@ import { TokenPayload } from './interfaces/jwt.interface';
 
 @Injectable()
 export class JwtService {
-  constructor(private readonly jwtService: NestJwtService) {}
+  constructor(
+    private readonly jwtService: NestJwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   /**
    * JWT 토큰 검증
@@ -19,7 +24,7 @@ export class JwtService {
    */
   verifyToken(token: string): TokenPayload {
     return this.jwtService.verify(token, {
-      secret: process.env.TOKEN_SECRET,
+      secret: this.configService.get<string>(ENV_TOKEN_SECRET_KEY),
     });
   }
 

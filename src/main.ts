@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { API_AUTH_TYPE } from './common/consts/swagger.const';
+import { ENV_SERVER_PORT_KEY } from './core/config/consts/config.const';
 
 /**
  * Nest Application 시작점
@@ -25,7 +26,7 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, documentFactory);
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env[ENV_SERVER_PORT_KEY] ?? 3000);
 
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
